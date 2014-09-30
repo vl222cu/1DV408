@@ -16,19 +16,22 @@ class LoginView {
     }
 
     public function loginHTML() {
+        $name = isset($_POST['username']) ? $_POST['username'] : '';
+
         $returnHTML = "
                 <head>
                     <title>Laboration. Inte inloggad.</title>
                     <meta http-equiv='content-type' content='text/html; charset=utf-8' />
                 </head>
                 <body>
-                    <h1>Laboration 2 - uf222ba</h1>
+                    <h1>Laboration 4 - vl222cu</h1>
+                    <p><a href='?registerpage'>Registrera ny användare</a></p>
                     <h2>Ej Inloggad</h2>
                     <form enctype='multipart/form-data' method='post' action='?login'>
                         <fieldset>";
         if($this->loginModel->getLoginMessage() !== null) $returnHTML .= $this->loginMessage($this->loginModel->getLoginMessage());
         $returnHTML .= "<legend>Login - Skriv användarnamn och lösenord</legend>
-                            <label>Användarnamn: </label><input type='text' name='username' />
+                            <label>Användarnamn: </label><input type='text' name='username' value='$name' />
                             <label>Lösenord: </label><input type='password' name='password' />
                             <label>Håll mig inloggad: </label><input type='checkbox' name='LoginView::Checked' id='AutologinID' />
                             <input type='submit' value='Logga in' />
@@ -54,7 +57,7 @@ class LoginView {
                     <meta http-equiv='content-type' content='text/html; charset=utf-8' />
                 </head>
                 <body>
-                    <h1>Laborationskod xx222aa</h1>
+                    <h1>Laboration 4 vl222cu</h1>
                     <h2>";
         $returnHTML .= $this->loginModel->getUserName();
         $returnHTML .= " är inloggad</h2>";
@@ -69,16 +72,55 @@ class LoginView {
         return $returnHTML;
     }
 
+    public function registerHTML() {
+        $name = isset($_POST['newUsername']) ? $_POST['newUsername'] : '';
+
+        $returnHTML = "
+                <head>
+                    <title>Laboration. Registrera användare.</title>
+                    <meta http-equiv='content-type' content='text/html; charset=utf-8' />
+                </head>
+                <body>
+                    <h1>Laboration 4 - vl222cu</h1>
+                    <p><a href='?return'>Tillbaka</a></p>
+                    <h2>Ej Inloggad, Registrerar användare</h2>
+                    <form enctype='multipart/form-data' method='post' action='?register'>
+                        <fieldset>";
+        if($this->loginModel->getLoginMessage() !== null) $returnHTML .= $this->loginMessage($this->loginModel->getLoginMessage());
+        $returnHTML .= "<legend>Registrera ny användare - Skriv in användarnamn och lösenord</legend>
+                            <p><label>Användarnamn: </label><input type='text' name='newUsername' value='$name'/></p>
+                            <p><label>Lösenord: </label><input type='password' name='newPassword'/></p>
+                            <p><label>Repetera Lösenord: </label><input type='password' name='confirmPassword'/></p>
+                            <p><label>Skicka: </label><input type='submit' value='Registrera'/>
+                        </fieldset>
+                    </form>
+                    <p>";
+        $returnHTML .= $this->today();
+        $returnHTML .= "</p>
+                 </body>
+                ";
+
+        return $returnHTML;
+    }
+
     public function loginMessage($type) {
         $loginMsg = array();
 
         $loginMsg[0] = "<p>Användarnamn saknas</p>";
         $loginMsg[1] = "<p>Lösenord saknas</p>";
         $loginMsg[2] = "<p>Felaktigt användarnamn och/eller lösenord</p>";
-        $loginMsg[3] = "<p>Du har loggat ut</p>";
+        $loginMsg[3] = "<p>Du har nu loggat ut</p>";
         $loginMsg[4] = "<p>Inloggning lyckades</p>";
         $loginMsg[5] = "<p>Inloggning lyckades och vi kommer ihåg dig nästa gång</p>";
-        $loginMsg[6] = "";
+        $loginMsg[6] = "<p>Inloggning lyckades via cookies</p>";
+        $loginMsg[7] = "<p>Felaktig information i cookie</p>";
+        $loginMsg[8] = "<p>Användarnamnet har för få tecken. Minst 3 tecken</p>";
+        $loginMsg[9] = "<p>Lösenordet har för få tecken. Minst 6 tecken</p>";
+        $loginMsg[10] = "<p>Registrering av ny användare lyckades</p>";
+        $loginMsg[11] = "<p>Lösenorden matchar inte</p>";
+        $loginMsg[12] = "<p>Användarnamnet innehåller ogiltiga tecken</p>";
+        $loginMsg[13] = "<p>Användarnamnet är redan upptaget</p>";
+
 
         return $loginMsg[$type];
     }
@@ -88,6 +130,12 @@ class LoginView {
             $action = "login";
         elseif(key($_GET) == "logout") {
             $action = "logout";
+        } elseif(key($_GET) == "registerpage") {
+            $action = "registerpage";
+        } elseif(key($_GET) == "register") {
+            $action = "register";
+        } elseif(key($_GET) == "return") {
+            $action = "return";
         } else {
             $action = "";
         }
@@ -99,6 +147,18 @@ class LoginView {
 
     public function getPostedPassword() {
         return $_POST["password"];
+   }
+    //Lagt till
+    public function getRegisteredUser() {
+        return $_POST["newUsername"];
+    }
+    //Lagt till
+    public function getRegisteredPassword() {
+        return $_POST["newPassword"];
+    }
+    //Lagt till
+    public function getConfirmedPassword() {
+        return $_POST["confirmPassword"];
     }
 
     public function CheckboxSaveLogin() {

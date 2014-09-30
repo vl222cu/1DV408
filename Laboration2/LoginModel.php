@@ -51,6 +51,36 @@ class LoginModel {
         }
     }
 
+    public function authenticateUserRegistration($userName, $password, $confirmedPassword) {
+
+        if(strlen($userName) < 3) {
+            $this->loginMessage = 8;
+            return false;
+        } elseif(strlen($password) < 6) {
+            $this->loginMessage = 9;
+            return false;
+        } elseif(preg_match('/[^A-Za-z0-9._\-$]/', $userName)) {
+            $this->loginMessage = 12;
+            return false;
+        } elseif($password != $confirmedPassword) {
+            $this->loginMessage = 11;
+            return false;
+        } elseif (($userName && $password && $confirmedPassword) !== null) {
+            $ret = $this->DALObject->setUserCredentialsInDB($userName, $password);
+            if($ret == true) {
+                $this->loginMessage = 10;
+                return true;
+            } else {
+                $this->loginMessage = 13;
+                return false;
+            }
+        }
+        else {
+            $this->loginMessage = 8 . $this->loginMessage = 9;
+            return false;
+        }
+    }
+
     public function logOutUser() {
         $this->loginMessage = 3;
         $this->userName = "";

@@ -71,6 +71,25 @@ class LoginController {
             $this->loginView->deleteCookies();
             //var_dump($_SESSION);
             return $this->loginView->loginHTML();
+
+        } elseif($action === "registerpage") {
+
+            return $this->loginView->registerHTML();
+            
+        } elseif($action === "register") {
+
+            $isUserRegistrationValid = $this->loginModel->authenticateUserRegistration($this->loginView->getRegisteredUser(), $this->loginView->getRegisteredPassword(), $this->loginView->getConfirmedPassword());
+            
+            if($isUserRegistrationValid == true) {
+                return $this->loginView->loginHTML();
+            } else {
+                return $this->loginView->registerHTML();
+            }
+
+        } elseif($action === "return") {
+
+            return $this->loginView->loginHTML();
+            
         } else {
             return $this->loginView->loginHTML();
         }
