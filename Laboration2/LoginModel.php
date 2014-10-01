@@ -15,6 +15,9 @@ class LoginModel {
     private $saveLogin;
     private $loginMessage;
     private $DALObject;
+    private $filteredName;
+    private $newUserName;
+    private $isUserRegistered;
 
     public function __construct() {
         $this->userName = null;
@@ -23,6 +26,9 @@ class LoginModel {
         $this->isUserAuthenticated = false;
         $this->saveLogin = false;
         $this->DALObject = new LoginDAL();
+        $this->filteredName = null;
+        $this->newUserName = null;
+        $this->isUserRegistered = false;
     }
 
     public function authenticateUser($userName, $password) {
@@ -53,13 +59,16 @@ class LoginModel {
 
     public function authenticateUserRegistration($userName, $password, $confirmedPassword) {
 
-        if(strlen($userName) < 3) {
+        if(empty($userName) && empty($password) && empty($confirmedPassword)) {
+            $this->loginMessage = 14;
+            return false;        
+        } elseif(strlen($userName) < 3) {
             $this->loginMessage = 8;
             return false;
         } elseif(strlen($password) < 6) {
             $this->loginMessage = 9;
             return false;
-        } elseif(preg_match('/[^A-Za-z0-9._\-$]/', $userName)) {
+        } elseif(preg_match('/[^A-Za-z0-9._\-$]/', $userName)) {    
             $this->loginMessage = 12;
             return false;
         } elseif($password != $confirmedPassword) {
@@ -68,6 +77,7 @@ class LoginModel {
         } elseif (($userName && $password && $confirmedPassword) !== null) {
             $ret = $this->DALObject->setUserCredentialsInDB($userName, $password);
             if($ret == true) {
+                $this->isUserRegistered = true;
                 $this->loginMessage = 10;
                 return true;
             } else {
@@ -75,10 +85,12 @@ class LoginModel {
                 return false;
             }
         }
-        else {
-            $this->loginMessage = 8 . $this->loginMessage = 9;
-            return false;
-        }
+    }
+
+    public function sanitizeString($userName) {
+        $name = filter_var($userName, FILTER_SANITIZE_STRING);
+        $this->filteredName = preg_replace("/[^A-Za-z0-9._\-$]/", "", $name);
+        return $this->filteredName;
     }
 
     public function logOutUser() {
@@ -101,6 +113,14 @@ class LoginModel {
 
     public function getPassword() {
         return $this->password;
+    }
+
+    public function getRegisteredUserName() {
+        return $this->newUserName;
+    }
+
+    public function getIsUserRegistered() {
+        return $this->isUserRegistered;
     }
 
     public function setUserCredentials($userName, $password) {

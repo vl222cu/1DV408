@@ -10,13 +10,17 @@
 
 class LoginView {
     private $loginModel;
+    public $name;
 
     public function __construct(LoginModel $loginModel) {
         $this->loginModel = $loginModel;
+        $this->name = isset($_POST['username']) ? $_POST['username'] : '';
     }
 
     public function loginHTML() {
-        $name = isset($_POST['username']) ? $_POST['username'] : '';
+        if($this->loginModel->getIsUserRegistered()) {
+            $this->name = $this->getRegisteredUser();
+        }
 
         $returnHTML = "
                 <head>
@@ -31,7 +35,7 @@ class LoginView {
                         <fieldset>";
         if($this->loginModel->getLoginMessage() !== null) $returnHTML .= $this->loginMessage($this->loginModel->getLoginMessage());
         $returnHTML .= "<legend>Login - Skriv användarnamn och lösenord</legend>
-                            <label>Användarnamn: </label><input type='text' name='username' value='$name' />
+                            <label>Användarnamn: </label><input type='text' name='username' value='$this->name' />
                             <label>Lösenord: </label><input type='password' name='password' />
                             <label>Håll mig inloggad: </label><input type='checkbox' name='LoginView::Checked' id='AutologinID' />
                             <input type='submit' value='Logga in' />
@@ -57,7 +61,7 @@ class LoginView {
                     <meta http-equiv='content-type' content='text/html; charset=utf-8' />
                 </head>
                 <body>
-                    <h1>Laboration 4 vl222cu</h1>
+                    <h1>Laboration 4 - vl222cu</h1>
                     <h2>";
         $returnHTML .= $this->loginModel->getUserName();
         $returnHTML .= " är inloggad</h2>";
@@ -73,7 +77,7 @@ class LoginView {
     }
 
     public function registerHTML() {
-        $name = isset($_POST['newUsername']) ? $_POST['newUsername'] : '';
+        $this->name = $this->loginModel->sanitizeString($this->name);
 
         $returnHTML = "
                 <head>
@@ -88,8 +92,8 @@ class LoginView {
                         <fieldset>";
         if($this->loginModel->getLoginMessage() !== null) $returnHTML .= $this->loginMessage($this->loginModel->getLoginMessage());
         $returnHTML .= "<legend>Registrera ny användare - Skriv in användarnamn och lösenord</legend>
-                            <p><label>Användarnamn: </label><input type='text' name='newUsername' value='$name'/></p>
-                            <p><label>Lösenord: </label><input type='password' name='newPassword'/></p>
+                            <p><label>Användarnamn: </label><input type='text' name='username' value='$this->name'/></p>
+                            <p><label>Lösenord: </label><input type='password' name='password'/></p>
                             <p><label>Repetera Lösenord: </label><input type='password' name='confirmPassword'/></p>
                             <p><label>Skicka: </label><input type='submit' value='Registrera'/>
                         </fieldset>
@@ -120,7 +124,8 @@ class LoginView {
         $loginMsg[11] = "<p>Lösenorden matchar inte</p>";
         $loginMsg[12] = "<p>Användarnamnet innehåller ogiltiga tecken</p>";
         $loginMsg[13] = "<p>Användarnamnet är redan upptaget</p>";
-
+        $loginMsg[14] = "<p>Användarnamnet har för få tecken. Minst 3 tecken</p>
+                         <p>Lösenordet har för få tecken. Minst 6 tecken</p>";
 
         return $loginMsg[$type];
     }
@@ -150,11 +155,11 @@ class LoginView {
    }
     //Lagt till
     public function getRegisteredUser() {
-        return $_POST["newUsername"];
+        return $_POST["username"];
     }
     //Lagt till
     public function getRegisteredPassword() {
-        return $_POST["newPassword"];
+        return $_POST["password"];
     }
     //Lagt till
     public function getConfirmedPassword() {
@@ -178,8 +183,10 @@ class LoginView {
     }
 
     public function setCookies() {
+        $passwordIsEncrypted = crypt($this->loginModel->getPassword());
+
         setcookie("LoginView::UserName", $this->loginModel->getUserName(), time() + 3600);
-        setcookie("LoginView::Password",  $this->loginModel->getPassword(), time() + 3600);
+        setcookie("LoginView::Password",  $passwordIsEncrypted, time() + 3600);
     }
 
     public function getCookies() {

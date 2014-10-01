@@ -45,18 +45,19 @@ class LoginDAL {
             return false;
         }
         else {
-        $sqlInsert = mysqli_query($this->dbConnection, "INSERT INTO login
+            $sqlInsert = mysqli_query($this->dbConnection, "INSERT INTO login
                                                             (username, password)
                                                             VALUES ('$user', '$pwd')");
 
+
             $this->dbConnection->close();
 
-            if($sqlInsert){
+           if($sqlInsert){
                 return true;
             }
             else {
                 return false;
-            }
+            } 
         }
     }
 }
